@@ -1,0 +1,33 @@
+.settings-page{max-width:1000px;padding-bottom:32px}
+.settings-fields{border:0;padding:0;margin:0;min-width:0}
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:25px 26px;margin-bottom:19px}
+.settings-section-heading{margin-bottom:23px}
+.settings-section-heading h2{font-family:Manrope,sans-serif;font-size:16px;font-weight:750;letter-spacing:-.35px;color:var(--text)}
+.settings-section-heading p{font-size:12px;line-height:1.8;color:var(--text-secondary);margin-top:7px;max-width:670px}
+.settings-page .form-field{margin:0;font-size:11px;gap:7px}
+.settings-page .form-field input{font-size:12px;min-height:38px}
+.settings-username{max-width:380px}
+.settings-rows{display:flex;flex-direction:column;gap:12px}
+.settings-edit-row{display:flex;gap:13px;align-items:flex-end;min-width:0}
+.settings-row-name{flex:1;min-width:100px}
+.settings-color{flex:none;width:49px}
+.settings-page .settings-color input{width:49px;height:38px;padding:5px;cursor:pointer;background:var(--surface-input)}
+.settings-color input::-webkit-color-swatch-wrapper{padding:0}
+.settings-color input::-webkit-color-swatch{border:0;border-radius:3px}
+.settings-color input::-moz-color-swatch{border:0;border-radius:3px}
+.settings-task-count{font-size:11px;color:var(--muted);white-space:nowrap;min-width:43px;padding-bottom:12px;text-align:right}
+.settings-remove{color:var(--danger);gap:6px}
+.settings-remove:hover:enabled{color:var(--danger-hover)}
+.settings-add-row{display:flex;align-items:flex-end;gap:13px;border-top:1px solid var(--border);padding-top:20px;margin-top:20px}
+.settings-add-row .settings-row-name{max-width:420px}
+.settings-add-row>.button{min-height:38px}
+.settings-empty{font-size:12px;color:var(--muted);line-height:1.8}
+.settings-reorder{display:flex;align-items:center;gap:1px;align-self:flex-end;min-height:38px}
+.settings-reorder .icon-button{padding:5px;color:var(--muted)}
+.settings-completed{font-size:11px;gap:7px;padding:0;height:38px;white-space:nowrap}
+.settings-row-note{font-size:10px;color:var(--muted);line-height:1.7;margin-top:7px;padding-left:61px}
+.settings-footer{display:flex;align-items:center;justify-content:flex-end;gap:9px;padding:6px 0 0}
+.settings-save-status{display:flex;align-items:center;gap:6px;margin-right:auto;color:var(--green);font-size:12px;min-height:25px}
+.settings-page>.form-error{margin:0 0 17px}
+@media(max-width:1100px){.settings-status-row{gap:9px;flex-wrap:wrap}.settings-status-row .settings-row-name{flex-basis:calc(100% - 125px)}.settings-status-row .settings-completed{margin-left:59px}.settings-status-row .settings-task-count{margin-left:auto}.settings-status-entry+.settings-status-entry{border-top:1px solid var(--border);padding-top:15px}.settings-row-note{padding-left:59px}.settings-status-row .settings-color{width:49px}.settings-status-row .settings-reorder{gap:0}}
+@media(max-width:540px){.settings-page{padding-bottom:25px}.settings-section{padding:20px 17px}.settings-section-heading{margin-bottom:19px}.settings-section-heading h2{font-size:15px}.settings-section-heading p{font-size:11px}.settings-edit-row{gap:10px;flex-wrap:wrap}.settings-page .form-field input{font-size:12px}.settings-row-name{min-width:100px}.settings-member-row .settings-row-name{flex-basis:calc(100% - 59px)}.settings-member-row .settings-task-count{margin-right:auto;text-align:left;padding:0;align-self:center}.settings-member-row+.settings-member-row{border-top:1px solid var(--border);padding-top:13px}.settings-status-row .settings-row-name{flex-basis:calc(100% - 124px)}.settings-status-row .settings-completed{margin-left:0}.settings-status-row .settings-task-count{font-size:10px}.settings-row-note{padding-left:0}.settings-remove{font-size:10px;padding:8px 9px;min-height:34px}.settings-add-row{flex-wrap:wrap;gap:10px}.settings-add-row .settings-row-name{flex-basis:calc(100% - 59px);max-width:none}.settings-add-row>.button{margin-left:auto}.settings-footer{flex-wrap:wrap;gap:8px}.settings-save-status{font-size:11px}.settings-footer .button{font-size:10px;padding:9px 11px}}

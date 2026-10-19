@@ -1,0 +1,16 @@
+services:
+  dayboard:
+    build: .
+    ports:
+      - "127.0.0.1:${DAYBOARD_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATA_DIR: /app/data
+      TZ: "${TZ:-UTC}"
+    volumes:
+      - dayboard-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  dayboard-data:

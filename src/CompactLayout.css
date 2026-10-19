@@ -1,0 +1,361 @@
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebar-header .brand {
+  min-width: 0;
+  padding: 0;
+  gap: 8px;
+  font-size: 22px;
+}
+
+.sidebar-header .brand-icon {
+  flex-shrink: 0;
+}
+
+.sidebar-header .brand-name {
+  white-space: nowrap;
+}
+
+.sidebar-header .brand-period {
+  margin-left: 0;
+}
+
+.sidebar-collapse-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-height: 34px;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.sidebar-collapse-button:hover:enabled {
+  background: var(--surface-hover);
+  color: var(--green);
+}
+
+.app-shell .main-shell main {
+  padding-top: 28px;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.app-shell .main-shell .page-heading {
+  margin-bottom: 22px;
+}
+
+.progress-panel {
+  margin-bottom: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.progress-panel > header,
+.progress-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 10px 14px;
+}
+
+.progress-disclosure {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  min-height: 32px;
+  margin: -5px 0;
+  padding: 5px 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: left;
+}
+
+.progress-disclosure > svg {
+  color: var(--muted);
+  transition: transform .15s ease;
+}
+
+.progress-disclosure[aria-expanded='false'] > svg {
+  transform: rotate(-90deg);
+}
+
+.progress-compact-summary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progress-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.progress-details[hidden] {
+  display: none;
+}
+
+.progress-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.progress-stat strong {
+  flex-shrink: 0;
+  color: var(--text);
+  font-family: Manrope, sans-serif;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.progress-stat span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+@media (min-width: 761px) {
+  .app-shell.sidebar-collapsed .sidebar {
+    width: 72px;
+    padding: 22px 10px 0;
+  }
+
+  .app-shell.sidebar-collapsed .main-shell {
+    margin-left: 72px;
+  }
+
+  .sidebar-collapsed .sidebar-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sidebar-collapsed .sidebar-header .brand-name {
+    display: none;
+  }
+
+  .sidebar-collapsed .sidebar-collapse-button {
+    width: 36px;
+  }
+
+  .sidebar-collapsed .sidebar nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    margin: 26px 0 0;
+  }
+
+  .sidebar-collapsed .sidebar .nav-item {
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px;
+  }
+
+  .sidebar-collapsed .sidebar .nav-item > span {
+    display: none;
+  }
+
+  .sidebar-collapsed .sidebar-theme-toggle {
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px;
+    border-radius: 7px;
+  }
+
+  .sidebar-collapsed .sidebar-theme-toggle > span {
+    display: none;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1000px) {
+  .sidebar-header .brand {
+    gap: 6px;
+    font-size: 18px;
+  }
+
+  .sidebar-collapse-button {
+    width: 28px;
+    padding: 5px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell .sidebar {
+    position: sticky;
+    inset: auto;
+    top: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 10px;
+    width: 100%;
+    height: auto;
+    padding: 10px 16px;
+  }
+
+  .app-shell .sidebar-header {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .app-shell .sidebar-header .brand {
+    gap: 7px;
+    font-size: 21px;
+  }
+
+  .app-shell .sidebar-header .brand-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-shell .sidebar .sidebar-collapse-button {
+    width: 40px;
+    min-height: 44px;
+    padding: 10px;
+  }
+
+  .app-shell .sidebar nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .app-shell .sidebar nav .nav-item {
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 7px;
+    font-size: 11px;
+  }
+
+  .app-shell .sidebar nav .nav-item > svg {
+    display: block;
+    width: 17px;
+    height: 17px;
+  }
+
+  .app-shell .sidebar nav .nav-count {
+    display: inline-block;
+    min-width: 18px;
+    font-size: 9px;
+  }
+
+  .app-shell .sidebar .sidebar-theme-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: center;
+    width: 40px;
+    min-width: 40px;
+    min-height: 44px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .app-shell .sidebar .sidebar-theme-toggle > span {
+    display: none;
+  }
+
+  .app-shell.sidebar-collapsed .sidebar nav {
+    display: none;
+  }
+
+  .app-shell.sidebar-collapsed .main-shell {
+    margin-left: 0;
+  }
+
+  .app-shell .main-shell main {
+    padding-top: 22px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+}
+
+@media (max-width: 540px) {
+  .app-shell .sidebar {
+    grid-template-columns: minmax(0, 1fr) 36px;
+    column-gap: 8px;
+    row-gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .app-shell .sidebar-header .brand {
+    font-size: 20px;
+  }
+
+  .app-shell .sidebar-header .brand-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .app-shell .sidebar .sidebar-theme-toggle {
+    width: 36px;
+    min-width: 36px;
+  }
+
+  .app-shell .main-shell main {
+    padding-top: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .progress-panel > header,
+  .progress-panel-header {
+    gap: 8px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .progress-compact-summary {
+    font-size: 11px;
+  }
+
+  .progress-details {
+    gap: 10px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .progress-stat {
+    gap: 6px;
+  }
+}

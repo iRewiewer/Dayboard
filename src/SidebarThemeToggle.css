@@ -1,0 +1,134 @@
+.sidebar-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  margin-top: auto;
+  margin-bottom: 24px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.sidebar-theme-toggle:hover:enabled,
+.sidebar-theme-toggle[aria-checked='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+
+.sidebar-theme-toggle[aria-checked='true'] > svg {
+  color: var(--green);
+}
+
+.sidebar-theme-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.sidebar-theme-toggle:disabled {
+  opacity: var(--disabled-opacity);
+}
+
+.theme-switch-track {
+  display: block;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 18px;
+  margin-left: auto;
+  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.theme-switch-track > span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform .15s ease, background .15s ease;
+}
+
+.sidebar-theme-toggle[aria-checked='true'] .theme-switch-track {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.sidebar-theme-toggle[aria-checked='true'] .theme-switch-track > span {
+  background: var(--button-text);
+  transform: translateX(14px);
+}
+
+@media (max-width: 760px) {
+  .app-shell .sidebar {
+    gap: 10px;
+  }
+
+  .app-shell .sidebar nav {
+    min-width: 0;
+  }
+
+  .sidebar-theme-toggle {
+    justify-content: center;
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    min-height: 44px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .sidebar-theme-toggle > span {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .app-shell .sidebar {
+    gap: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .sidebar .brand {
+    flex-shrink: 0;
+    gap: 5px;
+    font-size: 18px;
+  }
+
+  .sidebar .brand-icon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .app-shell .sidebar nav {
+    gap: 2px;
+  }
+
+  .sidebar nav .nav-item {
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px;
+    gap: 0;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  /* Text labels keep all three destinations clear on narrow phone screens. */
+  .sidebar nav .nav-item > svg {
+    display: none;
+  }
+
+  .sidebar-theme-toggle {
+    flex-basis: 36px;
+    width: 36px;
+    min-width: 36px;
+  }
+}
