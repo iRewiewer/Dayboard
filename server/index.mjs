@@ -17,7 +17,7 @@ export const THEME_COLORS = ['blood-red', 'crimson-red', 'green', 'purple', 'vio
 export const DEFAULT_THEME = { mode: 'dark', color: 'green' };
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 const EDITABLE_FIELDS = new Set(['title', 'description', 'status', 'severity', 'assigneeId', 'startDate', 'endDate', 'todayDate', 'repeat', 'dismissedOn', 'order']);
-const DEFAULT_SETTINGS = { todayStatuses: DEFAULT_STATUSES.filter(status => !status.isDone).map(status => status.id), todayOrder: 'severity', username: 'You', theme: DEFAULT_THEME };
+const DEFAULT_SETTINGS = { todayStatuses: DEFAULT_STATUSES.filter(status => !status.isDone).map(status => status.id), todayOrder: 'severity', username: 'You', defaultAssigneeId: 'unassigned', theme: DEFAULT_THEME };
 const BODY_LIMIT = 64 * 1024;
 const PROJECT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -138,15 +138,16 @@ function validateTheme(theme) {
   return { mode: theme.mode, color: theme.color };
 }
 
-function validateSettings(body, previous, statuses) {
+function validateSettings(body, previous, statuses, members) {
   assertObject(body);
   for (const key of Object.keys(body)) {
-    if (!['todayStatuses', 'todayOrder', 'username', 'theme'].includes(key)) throw new HttpError(400, `Unknown setting: ${key}.`);
+    if (!['todayStatuses', 'todayOrder', 'username', 'defaultAssigneeId', 'theme'].includes(key)) throw new HttpError(400, `Unknown setting: ${key}.`);
   }
   if ('todayStatuses' in body && (!Array.isArray(body.todayStatuses) || body.todayStatuses.some(id => !statuses.some(status => status.id === id)) || new Set(body.todayStatuses).size !== body.todayStatuses.length)) {
     throw new HttpError(400, 'todayStatuses must be an array of unique valid statuses.');
   }
   if ('todayOrder' in body && !['severity', 'manual'].includes(body.todayOrder)) throw new HttpError(400, 'todayOrder must be severity or manual.');
+  if ('defaultAssigneeId' in body && !members.some(member => member.id === body.defaultAssigneeId)) throw new HttpError(400, 'defaultAssigneeId must identify an existing member.');
   return {
     ...previous, ...body,
     ...('username' in body ? { username: validateText(body.username, 'Display name', 80, true) } : {}),
@@ -167,8 +168,8 @@ function validateStoredState(state) {
     if (!Array.isArray(state.members) || state.members.length < 1 || !isObject(state.members[0]) || Object.keys(UNASSIGNED_MEMBER).some(key => state.members[0][key] !== UNASSIGNED_MEMBER[key])) throw new Error('The system Unassigned member must be present and unchanged.');
     const validatedMembers = validateMembers(state.members.slice(1));
     if (state.members.some((member, index) => member.initials !== validatedMembers[index].initials)) throw new Error('Saved assignee initials are invalid.');
-    if (!['todayStatuses', 'todayOrder', 'username', 'theme'].every(key => key in state.settings)) throw new Error('Saved settings are incomplete.');
-    validateSettings(state.settings, DEFAULT_SETTINGS, state.statuses);
+    if (!['todayStatuses', 'todayOrder', 'username', 'defaultAssigneeId', 'theme'].every(key => key in state.settings)) throw new Error('Saved settings are incomplete.');
+    validateSettings(state.settings, DEFAULT_SETTINGS, state.statuses, state.members);
     const taskIds = new Set();
     const taskKeys = new Set();
     const validTimestamp = value => typeof value === 'string' && Number.isFinite(new Date(value).getTime());
@@ -280,13 +281,17 @@ export function createApp({ dataDir = process.env.DATA_DIR || resolve(PROJECT_DI
         tasks: state.tasks.map(task => ({ ...task, assigneeId: 'unassigned' })),
         nextKey: state.tasks.length === 0 ? 1 : state.nextKey,
         statuses: structuredClone(DEFAULT_STATUSES), members: [structuredClone(UNASSIGNED_MEMBER)],
-        settings: { ...state.settings, username: 'You' },
+        settings: { ...state.settings, username: 'You', defaultAssigneeId: 'unassigned' },
       };
     }
-    const needsThemeUpgrade = state?.version === 2 && isObject(state.settings) && !('theme' in state.settings);
-    if (needsThemeUpgrade) state.settings = { ...state.settings, theme: structuredClone(DEFAULT_THEME) };
+    const needsSettingsUpgrade = state?.version === 2 && isObject(state.settings) && (!('theme' in state.settings) || !('defaultAssigneeId' in state.settings));
+    if (needsSettingsUpgrade) state.settings = {
+      ...state.settings,
+      ...(!('theme' in state.settings) ? { theme: structuredClone(DEFAULT_THEME) } : {}),
+      ...(!('defaultAssigneeId' in state.settings) ? { defaultAssigneeId: 'unassigned' } : {}),
+    };
     validateStoredState(state);
-    if (needsMigration || needsThemeUpgrade) persist();
+    if (needsMigration || needsSettingsUpgrade) persist();
   } else {
     state = { version: 2, tasks: [], settings: structuredClone(DEFAULT_SETTINGS), nextKey: 1, statuses: structuredClone(DEFAULT_STATUSES), members: [structuredClone(UNASSIGNED_MEMBER)] };
     persist();
@@ -332,29 +337,31 @@ export function createApp({ dataDir = process.env.DATA_DIR || resolve(PROJECT_DI
       if (path === '/api/config' && method === 'PATCH') {
         const body = await readBody(request);
         assertObject(body);
-        if (Object.keys(body).some(key => !['members', 'statuses', 'username', 'theme'].includes(key))) throw new HttpError(400, 'Configuration supports members, statuses, username, and theme only.');
+        if (Object.keys(body).some(key => !['members', 'statuses', 'username', 'defaultAssigneeId', 'theme'].includes(key))) throw new HttpError(400, 'Configuration supports members, statuses, username, defaultAssigneeId, and theme only.');
         const members = 'members' in body ? validateMembers(body.members) : state.members;
+        const memberIds = new Set(members.map(member => member.id));
+        const defaultAssigneeId = 'defaultAssigneeId' in body ? body.defaultAssigneeId : memberIds.has(state.settings.defaultAssigneeId) ? state.settings.defaultAssigneeId : 'unassigned';
+        if (!memberIds.has(defaultAssigneeId)) throw new HttpError(400, 'defaultAssigneeId must identify an existing member.');
         const statuses = 'statuses' in body ? validateStatuses(body.statuses) : state.statuses;
         const username = 'username' in body ? validateText(body.username, 'Display name', 80, true) : state.settings.username;
         const theme = 'theme' in body ? validateTheme(body.theme) : state.settings.theme;
         const statusIds = new Set(statuses.map(status => status.id));
         const removedInUse = state.statuses.filter(status => !statusIds.has(status.id) && state.tasks.some(task => task.status === status.id));
         if (removedInUse.length) throw new HttpError(400, `Move tasks out of these statuses before removing them: ${removedInUse.map(status => status.name).join(', ')}.`);
-        const memberIds = new Set(members.map(member => member.id));
         const previousStatusIds = new Set(state.statuses.map(status => status.id));
         const newlyEnabled = statuses.filter(status => !previousStatusIds.has(status.id) && !status.isDone).map(status => status.id);
         const result = transaction(() => {
           state.members = members;
           state.statuses = statuses;
           state.tasks = state.tasks.map(task => memberIds.has(task.assigneeId) ? task : { ...task, assigneeId: 'unassigned' });
-          state.settings = { ...state.settings, username, theme, todayStatuses: [...state.settings.todayStatuses.filter(id => statusIds.has(id)), ...newlyEnabled] };
+          state.settings = { ...state.settings, username, defaultAssigneeId, theme, todayStatuses: [...state.settings.todayStatuses.filter(id => statusIds.has(id)), ...newlyEnabled] };
           return boardState();
         });
         return sendJson(response, 200, result);
       }
       if (path === '/api/settings' && method === 'PATCH') {
         const body = await readBody(request);
-        const settings = validateSettings(body, getMeta('settings'), state.statuses);
+        const settings = validateSettings(body, getMeta('settings'), state.statuses, state.members);
         transaction(() => putMeta('settings', settings));
         return sendJson(response, 200, settings);
       }
@@ -367,7 +374,7 @@ export function createApp({ dataDir = process.env.DATA_DIR || resolve(PROJECT_DI
           if (highest === Number.MAX_SAFE_INTEGER) throw new HttpError(409, 'Task numbers have reached the maximum supported value. Delete the task with the highest DAY number before creating another task.');
           const nextKey = highest + 1;
           const result = putTask({
-            id: randomUUID(), key: `DAY-${nextKey}`, title: changes.title, description: '', status: state.statuses.find(status => !status.isDone).id, severity: 'medium', assigneeId: 'unassigned',
+            id: randomUUID(), key: `DAY-${nextKey}`, title: changes.title, description: '', status: state.statuses.find(status => !status.isDone).id, severity: 'medium', assigneeId: state.settings.defaultAssigneeId,
             startDate: null, endDate: null, todayDate: null, repeat: null, dismissedOn: null,
             order: tasks.length ? Math.max(...tasks.map(item => item.order)) + 1 : 0,
             ...changes, comments: [], createdAt: now().toISOString(),

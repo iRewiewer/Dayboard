@@ -44,6 +44,7 @@ test('task CRUD, comments, repeat schedules, settings, and persistence', async t
   assert.deepEqual(state.statuses, DEFAULT_STATUSES);
   assert.deepEqual(state.members, [UNASSIGNED_MEMBER]);
   assert.equal(state.settings.username, 'You');
+  assert.equal(state.settings.defaultAssigneeId, 'unassigned');
   assert.deepEqual(state.settings.theme, { mode: 'dark', color: 'green' });
   assert.equal((await api('/api/config', 'PATCH', { members: [{ id: 'alex', name: 'Alex Example', color: '#6479d6' }] })).status, 200);
   const created = await api('/api/tasks', 'POST', { title: '  Ship the focus view  ', description: 'Keep daily work focused.', status: 'in-progress', severity: 'high', assigneeId: 'alex', startDate: '2026-10-19', endDate: '2026-10-21', todayDate: '2026-10-19' });
@@ -94,7 +95,7 @@ test('validation rejects malformed fields and leaves stored data intact', async 
     assert.equal(result.status, 400, JSON.stringify(body));
     assert.equal(typeof result.body.error, 'string');
   }
-  for (const body of [{ todayStatuses: ['done', 'done'] }, { todayStatuses: ['unknown'] }, { todayOrder: 'name' }, { mystery: true }]) {
+  for (const body of [{ todayStatuses: ['done', 'done'] }, { todayStatuses: ['unknown'] }, { todayOrder: 'name' }, { defaultAssigneeId: 'nobody' }, { mystery: true }]) {
     assert.equal((await api('/api/settings', 'PATCH', body)).status, 400);
   }
   assert.equal((await api('/api/settings', 'PATCH', { todayStatuses: [] })).status, 200, 'all statuses can be unchecked');
@@ -453,7 +454,7 @@ test('v1 migration preserves existing tasks and comments while removing fabricat
   assert.deepEqual(migrated.tasks, legacyTasks.map(task => ({ ...task, assigneeId: 'unassigned' })));
   assert.deepEqual(migrated.members, [UNASSIGNED_MEMBER]);
   assert.deepEqual(migrated.statuses, DEFAULT_STATUSES);
-  assert.deepEqual(migrated.settings, { ...legacy.settings, username: 'You', theme: DEFAULT_THEME });
+  assert.deepEqual(migrated.settings, { ...legacy.settings, username: 'You', defaultAssigneeId: 'unassigned', theme: DEFAULT_THEME });
   const saved = JSON.parse(await readFile(join(dataDir, 'dayboard.json'), 'utf8'));
   assert.equal(saved.version, 2);
   assert.equal(saved.nextKey, 103);
@@ -501,7 +502,7 @@ test('all 26 theme combinations roundtrip through settings, config, and restart 
   }
 });
 
-test('existing version 2 files without a theme gain only the dark green preference', async t => {
+test('existing version 2 files without newer settings gain only their defaults', async t => {
   const { api, dataDir, restart } = await fixture(t);
   await api('/api/config', 'PATCH', {
     username: 'Preserved name', members: [{ id: 'owner', name: 'My own name', color: '#112233' }],
@@ -513,9 +514,10 @@ test('existing version 2 files without a theme gain only the dark green preferen
   const filePath = join(dataDir, 'dayboard.json');
   const previous = JSON.parse(await readFile(filePath, 'utf8'));
   delete previous.settings.theme;
+  delete previous.settings.defaultAssigneeId;
   await writeFile(filePath, JSON.stringify(previous, null, 2));
   await restart();
-  const expected = { ...previous, settings: { ...previous.settings, theme: DEFAULT_THEME } };
+  const expected = { ...previous, settings: { ...previous.settings, defaultAssigneeId: 'unassigned', theme: DEFAULT_THEME } };
   assert.deepEqual(JSON.parse(await readFile(filePath, 'utf8')), expected);
   assert.deepEqual((await api('/api/state')).body, { tasks: expected.tasks, members: expected.members, statuses: expected.statuses, settings: expected.settings });
   const upgradedContents = await readFile(filePath, 'utf8');
@@ -594,4 +596,35 @@ test('static SPA routes, asset content types, API boundaries, and traversal prot
   assert.equal(await rawGet('/%2e%2e%5csecret.txt'), 400);
   assert.equal(await rawGet('/%00secret'), 400);
   assert.equal(await rawGet('/%notvalid'), 400);
+});
+
+test('a default assignee applies to new tasks, persists, validates, and falls back when removed', async t => {
+  const { api, restart } = await fixture(t);
+  const members = [
+    { id: 'owner', name: 'Owner', color: '#112233' },
+    { id: 'backup', name: 'Backup', color: '#445566' },
+  ];
+  const configured = await api('/api/config', 'PATCH', { members, defaultAssigneeId: 'owner' });
+  assert.equal(configured.status, 200);
+  assert.equal(configured.body.settings.defaultAssigneeId, 'owner');
+  assert.equal((await api('/api/tasks', 'POST', { title: 'Uses the config default' })).body.assigneeId, 'owner');
+
+  const settings = await api('/api/settings', 'PATCH', { defaultAssigneeId: 'backup' });
+  assert.equal(settings.status, 200);
+  assert.equal((await api('/api/tasks', 'POST', { title: 'Uses the settings default' })).body.assigneeId, 'backup');
+  assert.equal((await api('/api/tasks', 'POST', { title: 'Explicit choice wins', assigneeId: 'unassigned' })).body.assigneeId, 'unassigned');
+  await restart();
+  assert.equal((await api('/api/state')).body.settings.defaultAssigneeId, 'backup');
+  assert.equal((await api('/api/tasks', 'POST', { title: 'Uses the restored default' })).body.assigneeId, 'backup');
+
+  const beforeInvalid = (await api('/api/state')).body;
+  assert.equal((await api('/api/settings', 'PATCH', { defaultAssigneeId: 'missing' })).status, 400);
+  assert.equal((await api('/api/config', 'PATCH', { defaultAssigneeId: 'missing', username: 'Must not change' })).status, 400);
+  assert.deepEqual((await api('/api/state')).body, beforeInvalid);
+
+  const removed = await api('/api/config', 'PATCH', { members: [members[0]] });
+  assert.equal(removed.status, 200);
+  assert.equal(removed.body.settings.defaultAssigneeId, 'unassigned');
+  assert.equal(removed.body.tasks.find(task => task.title === 'Uses the settings default').assigneeId, 'unassigned');
+  assert.equal((await api('/api/tasks', 'POST', { title: 'Falls back safely' })).body.assigneeId, 'unassigned');
 });

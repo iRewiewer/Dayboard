@@ -10,6 +10,7 @@ export type TaskDraft = Pick<Task, 'title' | 'description' | 'status' | 'severit
 interface TaskDialogProps {
   task: Task | null;
   defaultStatus?: Status;
+  defaultAssigneeId: string;
   statuses: StatusDefinition[];
   members: Member[];
   onClose: () => void;
@@ -18,10 +19,10 @@ interface TaskDialogProps {
   onComment: (id: string, body: string) => Promise<void>;
 }
 
-function initialDraft(task: Task | null, defaultStatus: Status): TaskDraft {
+function initialDraft(task: Task | null, defaultStatus: Status, defaultAssigneeId: string): TaskDraft {
   return {
     title: task?.title ?? '', description: task?.description ?? '', status: task?.status ?? defaultStatus,
-    severity: task?.severity ?? 'medium', assigneeId: task?.assigneeId ?? 'unassigned',
+    severity: task?.severity ?? 'medium', assigneeId: task?.assigneeId ?? defaultAssigneeId,
     startDate: task?.startDate ?? null, endDate: task?.endDate ?? null,
   };
 }
@@ -37,9 +38,10 @@ function commentDate(value: string): string {
     : value;
 }
 
-export default function TaskDialog({ task, defaultStatus, statuses, members, onClose, onSave, onDelete, onComment }: TaskDialogProps) {
+export default function TaskDialog({ task, defaultStatus, defaultAssigneeId, statuses, members, onClose, onSave, onDelete, onComment }: TaskDialogProps) {
   const initialStatus = defaultStatus ?? statuses.find(status => !status.isDone)?.id ?? statuses[0]?.id ?? '';
-  const [draft, setDraft] = useState<TaskDraft>(() => initialDraft(task, initialStatus));
+  const initialAssigneeId = members.some(member => member.id === defaultAssigneeId) ? defaultAssigneeId : 'unassigned';
+  const [draft, setDraft] = useState<TaskDraft>(() => initialDraft(task, initialStatus, initialAssigneeId));
   const [comment, setComment] = useState('');
   const [pending, setPending] = useState<'save' | 'delete' | 'comment' | null>(null);
   const [error, setError] = useState('');
@@ -49,12 +51,12 @@ export default function TaskDialog({ task, defaultStatus, statuses, members, onC
   const busy = pending !== null;
 
   useEffect(() => {
-    setDraft(initialDraft(task, initialStatus));
+    setDraft(initialDraft(task, initialStatus, initialAssigneeId));
     setComment('');
     setError('');
     setConfirmDelete(false);
     // A comments update must not replace in-progress edits to the same task.
-  }, [task?.id, initialStatus]);
+  }, [task?.id, initialStatus, initialAssigneeId]);
 
   function update<Key extends keyof TaskDraft>(key: Key, value: TaskDraft[Key]) {
     setDraft(previous => ({ ...previous, [key]: value }));

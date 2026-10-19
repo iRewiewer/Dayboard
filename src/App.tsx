@@ -244,7 +244,7 @@ export default function App() {
         </>}
       </main>
     </div>
-    {editor && <TaskDialog task={editedTask} defaultStatus={editor.status} members={members} statuses={statuses} onClose={closeEditor} onSave={saveTask} onDelete={deleteTask} onComment={addComment} />}
+    {editor && <TaskDialog task={editedTask} defaultStatus={editor.status} defaultAssigneeId={state?.settings.defaultAssigneeId ?? 'unassigned'} members={members} statuses={statuses} onClose={closeEditor} onSave={saveTask} onDelete={deleteTask} onComment={addComment} />}
     {repeatTask && <RepeatDialog task={repeatTask} today={today} onClose={closeRepeat} onSave={(repeat) => patchTask(repeatTask.id, repeat ? { repeat, todayDate: today, dismissedOn: null } : { repeat: null })} />}
     {toast && <div className="toast" role="alert"><span>{toast}</span><button className="icon-button" aria-label="Dismiss error" onClick={() => setToast('')}><X size={16} /></button></div>}
   </div>;

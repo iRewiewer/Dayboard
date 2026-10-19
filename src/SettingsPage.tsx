@@ -10,6 +10,7 @@ export interface ConfigDraft {
   members: { id: string; name: string; color: string }[];
   statuses: StatusDefinition[];
   username: string;
+  defaultAssigneeId: string;
   theme: ThemePreference;
 }
 
@@ -23,6 +24,7 @@ interface SettingsPageProps {
 function readConfig(state: BoardState): ConfigDraft {
   return {
     username: state.settings.username,
+    defaultAssigneeId: state.settings.defaultAssigneeId,
     theme: { ...state.settings.theme },
     members: state.members.filter(member => member.id !== 'unassigned').map(({ id, name, color }) => ({ id, name, color })),
     statuses: state.statuses.map(status => ({ ...status })),
@@ -137,6 +139,7 @@ export default function SettingsPage({ state, onSave, externalBusy = false, them
     if (busy) return;
     const config: ConfigDraft = {
       username: draft.username.trim(),
+      defaultAssigneeId: draft.defaultAssigneeId,
       theme: { ...draft.theme },
       members: draft.members.map(member => ({ ...member, name: member.name.trim() })),
       statuses: draft.statuses.map(status => ({ ...status, name: status.name.trim() })),
@@ -178,8 +181,14 @@ export default function SettingsPage({ state, onSave, externalBusy = false, them
       <section className="settings-section" aria-labelledby={`${id}-assignees-heading`}>
         <div className="settings-section-heading">
           <h2 id={`${id}-assignees-heading`}>Assignees</h2>
-          <p>Add the names you want to assign tasks to. Removing a name makes its tasks unassigned.</p>
+          <p>Add the names you want to assign tasks to, and choose who new tasks start with. Removing a name makes its tasks unassigned.</p>
         </div>
+        <label className="form-field settings-default-assignee">Default assignee
+          <select value={draft.defaultAssigneeId} onChange={event => updateDraft(current => ({ ...current, defaultAssigneeId: event.target.value }))}>
+            <option value="unassigned">Unassigned</option>
+            {draft.members.map(member => <option key={member.id} value={member.id}>{member.name || 'Unnamed assignee'}</option>)}
+          </select>
+        </label>
         <div className="settings-rows">
           {draft.members.map((member, index) => {
             const count = state.tasks.filter(task => task.assigneeId === member.id).length;
@@ -191,7 +200,7 @@ export default function SettingsPage({ state, onSave, externalBusy = false, them
                 <input type="color" aria-label={`Color for assignee ${member.name || index + 1}`} value={member.color} onChange={event => updateDraft(current => ({ ...current, members: current.members.map(item => item.id === member.id ? { ...item, color: event.target.value } : item) }))} />
               </label>
               <span className="settings-task-count">{taskCount(count)}</span>
-              <button type="button" className="button button-secondary settings-remove" aria-label={`Remove assignee ${member.name || index + 1}`} onClick={() => updateDraft(current => ({ ...current, members: current.members.filter(item => item.id !== member.id) }))}><Trash2 size={14} />Remove</button>
+              <button type="button" className="button button-secondary settings-remove" aria-label={`Remove assignee ${member.name || index + 1}`} onClick={() => updateDraft(current => ({ ...current, members: current.members.filter(item => item.id !== member.id), defaultAssigneeId: current.defaultAssigneeId === member.id ? 'unassigned' : current.defaultAssigneeId }))}><Trash2 size={14} />Remove</button>
             </div>;
           })}
           {!draft.members.length && <p className="settings-empty">No assignees yet. Tasks can stay unassigned.</p>}

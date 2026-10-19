@@ -62,6 +62,7 @@ export const DEFAULT_THEME: ThemePreference = { mode: 'dark', color: 'green' }
 
 export interface Settings {
   username: string
+  defaultAssigneeId: string
   todayStatuses: Status[]
   todayOrder: 'severity' | 'manual'
   theme: ThemePreference

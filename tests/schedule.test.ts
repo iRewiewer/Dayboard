@@ -114,7 +114,7 @@ test('today view applies enabled statuses and configured ordering', () => {
     task({ id: 'high', status: 'in-progress', todayDate: '2026-10-19', repeat: createRepeat(2, '2026-10-19'), severity: 'high', order: 1 }),
     task({ id: 'yesterday', todayDate: '2026-10-18' }),
   ]
-  const settings = { username: 'You', todayStatuses: ['todo', 'in-progress'] as const, todayOrder: 'severity' as const, theme: { mode: 'dark' as const, color: 'green' as const } }
+  const settings = { username: 'You', defaultAssigneeId: 'unassigned', todayStatuses: ['todo', 'in-progress'] as const, todayOrder: 'severity' as const, theme: { mode: 'dark' as const, color: 'green' as const } }
   assert.deepEqual(getTodayTasks(tasks, { ...settings, todayStatuses: [...settings.todayStatuses] }, '2026-10-19').map(value => value.id), ['high', 'low'])
   assert.deepEqual(getTodayTasks(tasks, { ...settings, todayStatuses: [], todayOrder: 'manual' }, '2026-10-19'), [])
 })
@@ -124,6 +124,6 @@ test('today filtering accepts user-defined status IDs', () => {
     task({ id: 'custom-active', status: 'status-a12', todayDate: '2026-10-19' }),
     task({ id: 'custom-hidden', status: 'status-b34', todayDate: '2026-10-19' }),
   ]
-  const settings = { username: 'Taylor', todayStatuses: ['status-a12'], todayOrder: 'manual' as const, theme: { mode: 'dark' as const, color: 'green' as const } }
+  const settings = { username: 'Taylor', defaultAssigneeId: 'unassigned', todayStatuses: ['status-a12'], todayOrder: 'manual' as const, theme: { mode: 'dark' as const, color: 'green' as const } }
   assert.deepEqual(getTodayTasks(tasks, settings, '2026-10-19').map(value => value.id), ['custom-active'])
 })
