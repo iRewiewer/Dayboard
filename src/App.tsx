@@ -4,7 +4,7 @@ import { ArrowDown, ArrowDownWideNarrow, ArrowRight, ArrowUp, Check, ChevronDown
 import { api } from './api';
 import { SEVERITY_LABELS } from './domain';
 import type { BoardState, Member, Settings, Status, Task, ThemeColor, ThemeMode } from './domain';
-import { createRepeat, getTodayTasks, isForToday, localDate, sortTasks } from './schedule';
+import { createRepeat, getTodayTasks, isForToday, localDate, longDateLabel, sortTasks } from './schedule';
 import Modal from './Modal';
 import TaskDialog from './TaskDialog';
 import type { TaskDraft } from './TaskDialog';
@@ -65,7 +65,6 @@ export default function App() {
   const [loadError, setLoadError] = useState('');
   const [view, setView] = useState<View>(() => { try { const saved = localStorage.getItem('dayboard-view'); return saved === 'board' || saved === 'settings' ? saved : 'today'; } catch { return 'today'; } });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => layoutPreference('dayboard-sidebar-collapsed', false));
-  const [progressCollapsed, setProgressCollapsed] = useState(() => layoutPreference('dayboard-progress-collapsed', true));
   const [today, setToday] = useState(localDate);
   const [search, setSearch] = useState('');
   const [assignee, setAssignee] = useState('all');
@@ -91,11 +90,8 @@ export default function App() {
   }, []);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
-    try {
-      localStorage.setItem('dayboard-sidebar-collapsed', String(sidebarCollapsed));
-      localStorage.setItem('dayboard-progress-collapsed', String(progressCollapsed));
-    } catch { /* Layout preferences remain usable without browser storage. */ }
-  }, [sidebarCollapsed, progressCollapsed]);
+    try { localStorage.setItem('dayboard-sidebar-collapsed', String(sidebarCollapsed)); } catch { /* Layout preference is optional. */ }
+  }, [sidebarCollapsed]);
   useEffect(() => {
     if (!state?.settings.theme) return;
     cacheTheme(state.settings.theme);
@@ -227,16 +223,7 @@ export default function App() {
         }
       }}>
         {view === 'settings' ? state ? <SettingsPage state={state} onSave={saveConfig} externalBusy={pending > 0} themeShortcut={themeShortcut} /> : <div className="loading-state">{loadError ? <><p role="alert">{loadError}</p><button className="button button-secondary" onClick={() => void load()}>Try again</button></> : <><LoaderCircle className="spin" size={25} /><p>Loading settings…</p></>}</div> : <>
-        <div className="page-heading"><div><div className="eyebrow"><Sun size={15} />{dateLabel(today, { weekday: 'long', month: 'long', day: 'numeric' })}</div><h1>{view === 'today' ? 'Today' : 'Board'}</h1><p>{view === 'today' ? 'Tasks marked for today.' : 'All tasks grouped by status.'}</p></div><button className="button button-primary new-task" disabled={!state} onClick={() => addTask()}><Plus size={17} />New task</button></div>
-
-        {view === 'today' && <section className="progress-panel" aria-label="Today’s progress">
-          <div className="progress-panel-header"><button type="button" className="progress-disclosure" aria-expanded={!progressCollapsed} aria-controls="today-progress-details" onClick={() => setProgressCollapsed(current => !current)}><ChevronDown size={14} /><span>Today’s progress</span></button><span className="progress-compact-summary">{completed}/{marked.length} completed · {progress}%</span></div>
-          <div id="today-progress-details" className="progress-details" hidden={progressCollapsed}>
-            <div className="progress-stat"><strong>{marked.length}</strong><span>Planned for today</span></div>
-            <div className="progress-stat"><strong>{marked.length - completed}</strong><span>Remaining</span></div>
-            <div className="progress-stat"><strong>{completed}</strong><span>Completed</span></div>
-          </div>
-        </section>}
+        <div className={`page-heading${view === 'today' ? ' today-heading' : ''}`}><div><div className={`eyebrow${view === 'today' ? ' today-summary' : ''}`}><Sun size={15} />{view === 'today' ? <><span className="today-summary-date">{longDateLabel(today)}</span><span className="today-summary-stat"><span className="today-summary-separator" aria-hidden="true">•</span>{marked.length} planned for today</span><span className="today-summary-stat"><span className="today-summary-separator" aria-hidden="true">•</span>{completed}/{marked.length} completed ({progress}%)</span></> : dateLabel(today, { weekday: 'long', month: 'long', day: 'numeric' })}</div><h1>{view === 'today' ? 'Today' : 'Board'}</h1><p>{view === 'today' ? 'Tasks marked for today.' : 'All tasks grouped by status.'}</p></div><button className="button button-primary new-task" disabled={!state} onClick={() => addTask()}><Plus size={17} />New task</button></div>
 
         <div className="section-heading"><div><h2>{view === 'today' ? 'Today’s tasks' : 'All tasks'}<span className="count-badge">{visible.length}</span></h2></div>{view === 'board' && <span className="view-hint"><GripVertical size={14} />Drag cards to change status</span>}</div>
 

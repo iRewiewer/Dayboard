@@ -53,91 +53,33 @@
   margin-bottom: 22px;
 }
 
-.progress-panel {
-  margin-bottom: 24px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background: var(--surface);
+.app-shell .main-shell .today-heading {
+  margin-bottom: 18px;
 }
 
-.progress-panel > header,
-.progress-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 42px;
-  padding: 10px 14px;
+.today-summary {
+  flex-wrap: wrap;
+  row-gap: 5px;
+  max-width: min(100%, 920px);
+  line-height: 1.5;
 }
 
-.progress-disclosure {
+.today-summary > svg {
+  align-self: flex-start;
+  margin-top: 1px;
+}
+
+.today-summary-stat {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  flex-shrink: 0;
-  min-height: 32px;
-  margin: -5px 0;
-  padding: 5px 0;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
-  text-align: left;
-}
-
-.progress-disclosure > svg {
-  color: var(--muted);
-  transition: transform .15s ease;
-}
-
-.progress-disclosure[aria-expanded='false'] > svg {
-  transform: rotate(-90deg);
-}
-
-.progress-compact-summary {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 20px;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.progress-details {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  padding: 7px 14px;
-  border-top: 1px solid var(--border);
-  background: var(--surface-muted);
-}
-
-.progress-details[hidden] {
-  display: none;
-}
-
-.progress-stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.progress-stat strong {
-  flex-shrink: 0;
-  color: var(--text);
-  font-family: Manrope, sans-serif;
-  font-size: 17px;
-  font-weight: 650;
-  line-height: 1.2;
-}
-
-.progress-stat span {
-  color: var(--muted);
+.today-summary-separator {
+  color: var(--border-strong);
   font-size: 11px;
-  line-height: 1.35;
+  line-height: 1;
 }
 
 @media (min-width: 761px) {
@@ -338,24 +280,4 @@
     padding-left: 16px;
   }
 
-  .progress-panel > header,
-  .progress-panel-header {
-    gap: 8px;
-    padding-right: 12px;
-    padding-left: 12px;
-  }
-
-  .progress-compact-summary {
-    font-size: 11px;
-  }
-
-  .progress-details {
-    gap: 10px;
-    padding-right: 12px;
-    padding-left: 12px;
-  }
-
-  .progress-stat {
-    gap: 6px;
-  }
 }

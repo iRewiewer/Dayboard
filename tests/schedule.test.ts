@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { Task } from '../src/domain.ts'
-import { addDays, createRepeat, getTodayTasks, isForToday, localDate, sortTasks } from '../src/schedule.ts'
+import { addDays, createRepeat, getTodayTasks, isForToday, localDate, longDateLabel, sortTasks } from '../src/schedule.ts'
 
 function task(overrides: Partial<Task> = {}): Task {
   return {
@@ -15,6 +15,20 @@ test('localDate uses local year, month and day instead of a UTC date', () => {
   const value = new Date(2026, 9, 19, 0, 1)
   assert.equal(localDate(value), '2026-10-19')
   assert.throws(() => localDate(new Date('invalid')), RangeError)
+})
+
+test('longDateLabel adds the correct English ordinal suffix', () => {
+  assert.equal(longDateLabel('2026-01-01'), 'Thursday 1st January')
+  assert.equal(longDateLabel('2026-02-02'), 'Monday 2nd February')
+  assert.equal(longDateLabel('2026-03-03'), 'Tuesday 3rd March')
+  assert.equal(longDateLabel('2026-10-19'), 'Monday 19th October')
+  assert.equal(longDateLabel('2026-11-11'), 'Wednesday 11th November')
+  assert.equal(longDateLabel('2026-11-12'), 'Thursday 12th November')
+  assert.equal(longDateLabel('2026-11-13'), 'Friday 13th November')
+  assert.equal(longDateLabel('2026-12-21'), 'Monday 21st December')
+  assert.equal(longDateLabel('2026-12-22'), 'Tuesday 22nd December')
+  assert.equal(longDateLabel('2026-12-23'), 'Wednesday 23rd December')
+  assert.throws(() => longDateLabel('2026-02-29'), RangeError)
 })
 
 test('calendar arithmetic crosses leap day, year boundaries and DST dates', () => {

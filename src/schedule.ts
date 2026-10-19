@@ -22,6 +22,23 @@ function parseCalendarDate(value: string): Date {
   return result
 }
 
+/** Format a calendar date for the Today heading with an English ordinal day. */
+export function longDateLabel(value: string): string {
+  const date = parseCalendarDate(value)
+  const day = date.getDate()
+  const lastTwoDigits = day % 100
+  const suffix = lastTwoDigits >= 11 && lastTwoDigits <= 13
+    ? 'th'
+    : day % 10 === 1
+      ? 'st'
+      : day % 10 === 2
+        ? 'nd'
+        : day % 10 === 3 ? 'rd' : 'th'
+  const weekday = new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(date)
+  const month = new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(date)
+  return `${weekday} ${day}${suffix} ${month}`
+}
+
 /** Add calendar days, even when the local day has 23 or 25 hours. */
 export function addDays(date: string, amount: number): string {
   if (!Number.isSafeInteger(amount)) throw new RangeError('Days must be an integer')
