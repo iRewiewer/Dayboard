@@ -436,7 +436,7 @@ export function createApp({ dataDir = process.env.DATA_DIR || resolve(PROJECT_DI
   return {
     server,
     filePath,
-    listen(port = Number(process.env.PORT || 3000), host = process.env.HOST || '0.0.0.0') {
+    listen(port = Number(process.env.PORT || 9192), host = process.env.HOST || '0.0.0.0') {
       return new Promise((resolveListen, reject) => {
         const onError = error => reject(error);
         server.once('error', onError);

@@ -8,6 +8,7 @@ coverage
 *.log
 .DS_Store
 README.md
+docs
 tests
 *.tsbuildinfo
 server/.dayboard-test-*

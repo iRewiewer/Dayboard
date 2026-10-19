@@ -4,6 +4,35 @@ A personal, self-hosted task board built around a simple workflow: keep everythi
 
 Dayboard has no accounts or sign-in. Your board starts empty, and tasks, comments, and settings live in a readable JSON file.
 
+## Screenshots
+
+These screenshots use example tasks in a separate demo board. New boards start empty.
+
+### The board
+
+All tasks grouped by status, with compact cards showing severity, assignee, dates, and comments. Shown in dark Green.
+
+![Kanban board with example tasks in the dark Green theme](docs/screenshots/board-dark-green.jpg)
+
+### Today
+
+A focused list of selected tasks, with status filters, severity or manual ordering, and repeat controls. Shown in dark Green.
+
+![Today view with example tasks and repeat controls in the dark Green theme](docs/screenshots/today-dark-green.jpg)
+
+<details>
+<summary>Explore a few more themes</summary>
+
+Every accent supports light and dark mode. Here are four of the 26 combinations:
+
+| Light · Cyan | Dark · Purple |
+| :--: | :--: |
+| ![Today view in the light Cyan theme](docs/screenshots/today-light-cyan.jpg) | ![Board view in the dark Purple theme](docs/screenshots/board-dark-purple.jpg) |
+| **Light · Orange** | **Dark · Blood red** |
+| ![Board view in the light Orange theme](docs/screenshots/board-light-orange.jpg) | ![Today view in the dark Blood red theme](docs/screenshots/today-dark-blood-red.jpg) |
+
+</details>
+
 ## The workflow
 
 1. **Capture work on the board.** Create tasks with an assignee, severity, dates, and description. Drag cards between statuses, or open a task to edit its details and add comments.
@@ -22,7 +51,7 @@ cd Dayboard
 docker compose up --build -d
 ```
 
-Open [localhost:3000](http://localhost:3000).
+Open [localhost:9192](http://localhost:9192).
 
 ```sh
 docker compose logs -f dayboard
@@ -78,21 +107,21 @@ The ownership and permissions step makes the restored file readable by the conta
 
 Requires Node.js **22.12 or newer**. The production image uses Node.js 24. The frontend is React, TypeScript, and Vite; the backend uses Node's HTTP server and JSON file persistence.
 
-The development API and Docker both use port 3000. If Docker is running Dayboard, stop it first with `docker compose stop dayboard`.
+The development API and Docker both use port 9192. If Docker is running Dayboard, stop it first with `docker compose stop dayboard`.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open [localhost:5173](http://localhost:5173). Vite proxies API requests to port 3000. Development data lives in `data/dayboard.json` inside the repository and is excluded from Git.
+Open [localhost:5173](http://localhost:5173). Vite proxies API requests to port 9192. Development data lives in `data/dayboard.json` inside the repository and is excluded from Git.
 
 ```sh
 npm test
 npm run build
 ```
 
-After stopping the development server, `npm start` serves the built frontend and API together at [localhost:3000](http://localhost:3000). `DATA_DIR` changes the backend data directory, and `PORT` changes its listening port; Vite's development proxy is configured separately in `vite.config.ts`.
+After stopping the development server, `npm start` serves the built frontend and API together at [localhost:9192](http://localhost:9192). `DATA_DIR` changes the backend data directory, and `PORT` changes its listening port; Vite's development proxy follows the same `PORT` value (default `9192`).
 
 Source lives in `src/`, the HTTP API and persistence in `server/`, and behavior tests in `server/` and `tests/`. The Docker image runs as an unprivileged user and checks `/api/health`.
 
