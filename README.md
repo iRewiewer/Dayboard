@@ -6,11 +6,11 @@ Dayboard has no accounts or sign-in. Your board starts empty, and tasks, comment
 
 ## Screenshots
 
-These screenshots use example tasks in a separate demo board. New boards start empty.
+These desktop screenshots use example tasks in a separate demo board. New boards start empty.
 
 ### The board
 
-All tasks grouped by status, with compact cards showing severity, assignee, dates, and comments. Shown in dark Green.
+All five default status columns are visible, with compact cards showing severity, assignee, due dates, and comment counts. Shown in dark Green.
 
 ![Kanban board with example tasks in the dark Green theme](docs/screenshots/board-dark-green.jpg)
 
